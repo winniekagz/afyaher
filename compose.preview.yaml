@@ -1,0 +1,13 @@
+# Isolated local stack while older containers cannot be stopped by the host daemon.
+services:
+  backend:
+    ports: !override
+      - "127.0.0.1:8001:8000"
+    environment:
+      CORS_ORIGINS: '["http://127.0.0.1:3002","http://localhost:3002"]'
+  frontend:
+    build:
+      args:
+        NEXT_PUBLIC_API_BASE_URL: http://127.0.0.1:8001
+    ports: !override
+      - "127.0.0.1:3002:3000"
