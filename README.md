@@ -2,13 +2,17 @@
 
 Private, mobile-first reproductive-health education prototype for adults (18+), initially focused on PCOS, ovarian cysts, and ovarian torsion. Development uses synthetic scenarios only. There is no clinical reviewer yet; this is not a diagnostic or treatment service and must not be used with real patients or released publicly before the appropriate reviews.
 
-## Day 1 scope and status
+## Current frontend prototype
 
-Next.js presents a local connection check; FastAPI owns a versioned, Pydantic-validated health endpoint. The page has loading, connected, error, and retry states. There are no medical-question inputs, AI calls, databases, accounts, uploads, or stored chats.
+Six connected screen types are implemented: Home (`/`), Condition Library (`/conditions`), Condition Detail (`/conditions/pcos` and the two other topic routes), Ask AfyaHer (`/ask?topic=pcos`), Source Details (`/sources/who-pcos?topic=pcos`), and Appointment Preparation (`/appointment?topic=pcos`). The original FastAPI health check remains at `/dev/status`.
+
+The assistant is **explicitly a local demo**, not live AI. Suggested questions return fixed, source-attributed examples. Typed questions receive a limitation response; they are not medically assessed, sent to a provider, or logged. Temporary conversation and appointment drafts survive client-side navigation but clear on refresh. No browser storage, accounts, databases, uploads, or live model calls were added.
+
+The design uses the existing palette, readable system fonts, responsive navigation, original decorative line work, and Lucide icons. Source pages expose publisher dates, context, permissions limitations, and the absence of AfyaHer clinical review. This frontend is an engineering prototype, not a clinically validated production product.
 
 The broader approved architecture is a modular FastAPI monolith with a Next.js UI. PostgreSQL/pgvector, SQLAlchemy/Alembic, hosted model/embedding APIs, RAG, safety screening, and citation validation belong to later milestones. Do not move domain logic into Next.js.
 
-`docs/PRD.md`, `docs/ARCHITECTURE.md`, and `docs/SYSTEM_DESIGN.md` were absent during setup. This implementation follows the user's approved Day 1 requirements and existing project instructions; it does not replace or claim to implement an unseen PRD. See [Day 1 decisions](docs/DAY1_PLAN.md) and [verification report](docs/DAY1_VERIFICATION.md).
+`docs/PRD.md`, `docs/ARCHITECTURE.md`, and `docs/SYSTEM_DESIGN.md` were absent during setup. The foundation follows the user's approved Day 1 requirements; the six-screen frontend follows their subsequently approved UX brief and plan. It follows existing project instructions and does not replace or claim to implement an unseen PRD. See [Day 1 decisions](docs/DAY1_PLAN.md) and [verification report](docs/DAY1_VERIFICATION.md).
 
 ## Prerequisites
 
@@ -38,6 +42,24 @@ The browser calls the API on the host's loopback address, not the internal Docke
 With the containers running, use `npm run test:e2e:docker` from `frontend/` to run the browser checks without starting duplicate servers.
 
 The UI palette uses mauve `#C599B6`, rose `#E6B2BA`, peach `#FAD0C4`, and cream `#FFF7F3`, with darker plum text and buttons for readable contrast.
+
+### Current managed-workspace preview
+
+The latest six-screen UI is at **http://127.0.0.1:3002** and its API is at **http://127.0.0.1:8001**. The host Docker daemon denies permission to stop older containers on ports 3000 and 3001. Those containers are preserved; they are not the latest build. An isolated frontend/backend pair uses the same approved architecture on alternate loopback ports:
+
+```bash
+docker compose -p afyaher-ux -f compose.yaml -f compose.preview.yaml up --build -d --wait
+```
+
+The override changes the host ports, frontend API build argument, and backend's explicit local CORS allowlist. It adds no database or external service. Resolving the host daemon's container-stop permission error is a separate host task; no system security settings were changed. When host permissions are corrected, use the same Compose arguments followed by `down` to stop this stack.
+
+To check the running preview from `frontend/`:
+
+```bash
+PLAYWRIGHT_BASE_URL=http://127.0.0.1:3002 npm run test:e2e:docker
+```
+
+Use `PLAYWRIGHT_BROWSERS_PATH` too if Chromium was installed in a custom directory. See [frontend implementation and verification](docs/FRONTEND_UX.md).
 
 ### Run without Docker
 
