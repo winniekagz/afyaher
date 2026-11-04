@@ -236,10 +236,7 @@ class TestCorsPost:
             json={"topic": "pcos", "question": "What is PCOS?"},
             headers={"Origin": "http://localhost:3000"},
         )
-        assert (
-            resp.headers["access-control-allow-origin"]
-            == "http://localhost:3000"
-        )
+        assert resp.headers["access-control-allow-origin"] == "http://localhost:3000"
 
     def test_disallowed_origin(self, client):
         resp = client.post(
@@ -259,10 +256,7 @@ class TestCorsPost:
             },
         )
         assert resp.status_code == 200
-        assert (
-            resp.headers["access-control-allow-origin"]
-            == "http://localhost:3000"
-        )
+        assert resp.headers["access-control-allow-origin"] == "http://localhost:3000"
 
 
 # ── Schema-level validation (no HTTP) ────────────────────────────
@@ -274,10 +268,7 @@ class TestRequestSchemaValidation:
     def test_tabs_and_newlines_rejected(self):
         with pytest.raises(ValidationError) as exc_info:
             EducationalRequest(topic="pcos", question="\t\n\r\n")
-        assert any(
-            "non-whitespace" in e["msg"]
-            for e in exc_info.value.errors()
-        )
+        assert any("non-whitespace" in e["msg"] for e in exc_info.value.errors())
 
     def test_three_non_whitespace_accepted(self):
         req = EducationalRequest(topic="pcos", question="abc")

@@ -6,13 +6,27 @@ Private, mobile-first reproductive-health education prototype for adults (18+), 
 
 Six connected screen types are implemented: Home (`/`), Condition Library (`/conditions`), Condition Detail (`/conditions/pcos` and the two other topic routes), Ask AfyaHer (`/ask?topic=pcos`), Source Details (`/sources/who-pcos?topic=pcos`), and Appointment Preparation (`/appointment?topic=pcos`). The original FastAPI health check remains at `/dev/status`.
 
-The assistant is **explicitly a local demo**, not live AI. Suggested questions return fixed, source-attributed examples. Typed questions receive a limitation response; they are not medically assessed, sent to a provider, or logged. Temporary conversation and appointment drafts survive client-side navigation but clear on refresh. No browser storage, accounts, databases, uploads, or live model calls were added.
+The assistant is a **private prototype, not live AI**. Suggested questions return
+local fixed, unreviewed examples with editorial references. Typed synthetic
+questions are sent to the local FastAPI service; the UI displays its real
+`service_unavailable` status, limitation and disclaimer without substituting a
+demo response. Runtime checks reject malformed or topic/question-mismatched API
+responses. Temporary conversation and appointment drafts survive client navigation
+but clear on refresh; no browser persistence, analytics or provider calls were
+added. Backend privacy controls remain incomplete: request/validation responses can
+echo input, and education responses lack an explicit no-store policy. Use synthetic
+questions only. See the [current API data flow](docs/API_INTEGRATION.md).
 
 The design uses the existing palette, readable system fonts, responsive navigation, original decorative line work, and Lucide icons. Source pages expose publisher dates, context, permissions limitations, and the absence of AfyaHer clinical review. This frontend is an engineering prototype, not a clinically validated production product.
 
 The broader approved architecture is a modular FastAPI monolith with a Next.js UI. PostgreSQL/pgvector, SQLAlchemy/Alembic, hosted model/embedding APIs, RAG, safety screening, and citation validation belong to later milestones. Do not move domain logic into Next.js.
 
-`docs/PRD.md`, `docs/ARCHITECTURE.md`, and `docs/SYSTEM_DESIGN.md` were absent during setup. The foundation follows the user's approved Day 1 requirements; the six-screen frontend follows their subsequently approved UX brief and plan. It follows existing project instructions and does not replace or claim to implement an unseen PRD. See [Day 1 decisions](docs/DAY1_PLAN.md) and [verification report](docs/DAY1_VERIFICATION.md).
+The root `AfyaHer_PRD.docx` and `AfyaHer_Architecture.docx` are now available as
+version-0.1 drafts. Canonical Markdown specifications and the system-design
+document remain missing. The foundation follows approved incremental tasks; it
+does not claim full implementation or approval of those drafts. See the
+[current-state audit](docs/audits/AFYAHER_CURRENT_STATE_AUDIT.md) and subsequent
+verification reports; older reports describe their own as-of state.
 
 ## Prerequisites
 
@@ -143,6 +157,12 @@ uv run python -m scripts.search_passages "green lanterns"
 
 ## Checks
 
+[Development standards](CONTRIBUTING.md), [security standards](SECURITY.md), and
+[GitHub Actions setup](docs/CI.md) define the required quality gates. Backend and
+frontend workflows run on pull requests, main-branch pushes and manual dispatch;
+they build images without publishing or deploying. Weekly Dependabot updates are
+configured separately for the root and frontend repositories.
+
 From `backend/`:
 
 ```bash
@@ -172,6 +192,12 @@ Keep coding-tool credentials and budgets separate from future AfyaHer runtime cr
 
 Provider setup references: [Claude Code API-key billing](https://support.claude.com/en/articles/12304248-manage-api-key-environment-variables-in-claude-code), [VS Code language models](https://code.visualstudio.com/docs/agent-customization/language-models), and [Copilot feature limitations](https://code.visualstudio.com/docs/agents/agent-troubleshooting/faq). Recheck account-specific availability before enabling paid usage.
 
-## Git limitation
+## Git layout
 
-The environment exposes an empty read-only tmpfs at the root `.git/`, so the root is not a usable repository. `frontend/.git/` contains an existing `main` history, including `05ee822` (Create Next App initial commit). It has been preserved. Do not initialize over either location or delete/move metadata blindly. A history-preserving migration to a root monorepo must be performed in a normal writable checkout. Until then, frontend Git status does not include backend or root documentation changes; back up the entire workspace.
+The root and `frontend/` retain separate histories. The root records the frontend
+as a Git link, with its remote in `.gitmodules`; clone recursively to fetch both.
+Commit and push frontend changes first, then update the root frontend pointer.
+Root CI checks that exact revision. A private frontend repository needs the
+read-only checkout setup described in [CI documentation](docs/CI.md). Do not
+reinitialize or flatten either history. The managed sandbox may require permission
+to write root Git metadata; both histories are now usable with that permission.

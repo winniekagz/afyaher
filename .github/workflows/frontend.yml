@@ -1,0 +1,78 @@
+name: Frontend CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: frontend-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    name: Frontend quality and integration
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      NEXT_TELEMETRY_DISABLED: "1"
+      NEXT_PUBLIC_API_BASE_URL: http://127.0.0.1:8000
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - name: Read the recorded frontend revision
+        id: revision
+        working-directory: .
+        run: echo "sha=$(git rev-parse HEAD:frontend)" >> "$GITHUB_OUTPUT"
+      - name: Check out that exact frontend revision
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          repository: winniekagz/frontend
+          ref: ${{ steps.revision.outputs.sha }}
+          path: frontend
+          # Needed only if the separate frontend repository is private.
+          token: ${{ secrets.FRONTEND_READ_TOKEN || github.token }}
+          persist-credentials: false
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: "22"
+          package-manager-cache: false
+      - uses: astral-sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78 # v7
+        with:
+          version: "0.11.9"
+          enable-cache: false
+      - name: Install locked frontend dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Lint
+        run: npm run lint
+      - name: Check formatting
+        run: npm run format:check
+      - name: Type check
+        run: npm run typecheck
+      - name: Unit tests
+        run: npm run test
+      - name: Production build
+        run: npm run build
+      - name: Prepare standalone assets for browser tests
+        run: |
+          cp -R public .next/standalone/
+          cp -R .next/static .next/standalone/.next/
+      - name: Build frontend image without publishing
+        run: docker build --tag afyaher-frontend:ci .
+      - name: Install locked backend for browser integration
+        working-directory: backend
+        run: uv sync --locked --python 3.13
+      - name: Install matching Chromium for synthetic browser tests
+        run: npx playwright install --with-deps chromium
+      - name: Browser tests against local frontend and backend
+        run: npm run test:e2e
+      - name: Audit frontend dependencies (high and critical)
+        run: npm audit --audit-level=high

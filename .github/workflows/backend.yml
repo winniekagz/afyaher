@@ -1,0 +1,43 @@
+name: Backend CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: backend-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    name: Backend quality
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78 # v7
+        with:
+          version: "0.11.9"
+          enable-cache: false
+      - name: Install locked dependencies
+        run: uv sync --locked --python 3.13
+      - name: Lint
+        run: uv run --locked ruff check .
+      - name: Check formatting
+        run: uv run --locked ruff format --check .
+      - name: Test API, evidence policies and OpenAPI documentation
+        run: uv run --locked pytest -q
+      - name: Build backend image without publishing
+        run: docker build --tag afyaher-backend:ci .
+      - name: Audit locked dependencies
+        run: uv audit --locked
