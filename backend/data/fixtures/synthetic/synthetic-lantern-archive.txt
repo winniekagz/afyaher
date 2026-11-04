@@ -1,0 +1,9 @@
+SYNTHETIC FIXTURE. This document is invented for software testing. It contains no medical information and must never be shown to users as evidence. The topic label "pcos" on this fixture is a routing label only.
+
+The Lantern Archive is a fictional library on the imaginary island of Velmora. Its keepers record the colour of every lantern lit at dusk. Blue lanterns mark quiet evenings. Amber lanterns mark market days. Green lanterns are lit only when the tide clock chimes twice.
+
+The archive has three reading rooms. The North Room stores tide clock diaries. The East Room stores lantern colour ledgers. The South Room is always closed for repainting, and nobody on Velmora remembers its original colour.
+
+Each ledger entry has a number, a colour, and the keeper's initials. Entry 417 is famous because the keeper wrote "violet" although violet lanterns do not exist on Velmora. Keepers still debate whether entry 417 was a joke or a mistake.
+
+Wageni wa kubuni hupokelewa kwa salamu: "Karibu kwenye Hifadhi ya Taa." Les visiteurs fictifs disent parfois : « Quelle belle lumière… » 架空の訪問者はこう書きます。灯りがきれいです。また来ます。

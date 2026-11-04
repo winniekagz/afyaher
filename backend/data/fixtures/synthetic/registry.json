@@ -1,0 +1,22 @@
+{
+  "topic": "pcos",
+  "sources": [
+    {
+      "id": "synthetic-lantern-archive",
+      "topic": "pcos",
+      "title": "SYNTHETIC FIXTURE: The Fictional Lantern Archive (not medical content)",
+      "publisher": "AfyaHer development fixtures (not a real publisher)",
+      "url": "https://afyaher-fixtures.invalid/synthetic-lantern-archive",
+      "evidence_type": "synthetic_fixture",
+      "content_scope": "development_only",
+      "publication_date": null,
+      "last_verified_date": null,
+      "clinical_review_status": "not_reviewed",
+      "ingestion_permission": "not_verified",
+      "license": null,
+      "authorization_reference": null,
+      "authorization_date": null,
+      "ingestion_status": "metadata_only"
+    }
+  ]
+}

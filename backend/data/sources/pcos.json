@@ -1,0 +1,39 @@
+{
+  "topic": "pcos",
+  "sources": [
+    {
+      "id": "who-pcos",
+      "topic": "pcos",
+      "title": "Polycystic ovary syndrome",
+      "publisher": "World Health Organization",
+      "url": "https://www.who.int/news-room/fact-sheets/detail/polycystic-ovary-syndrome",
+      "evidence_type": "fact_sheet",
+      "content_scope": "production",
+      "publication_date": null,
+      "last_verified_date": null,
+      "clinical_review_status": "not_reviewed",
+      "ingestion_permission": "not_verified",
+      "license": null,
+      "authorization_reference": null,
+      "authorization_date": null,
+      "ingestion_status": "metadata_only"
+    },
+    {
+      "id": "monash-pcos-guideline",
+      "topic": "pcos",
+      "title": "International PCOS Guideline",
+      "publisher": "Monash University",
+      "url": "https://www.monash.edu/medicine/mchri/pcos/guideline",
+      "evidence_type": "clinical_guideline",
+      "content_scope": "production",
+      "publication_date": null,
+      "last_verified_date": null,
+      "clinical_review_status": "not_reviewed",
+      "ingestion_permission": "not_verified",
+      "license": null,
+      "authorization_reference": null,
+      "authorization_date": null,
+      "ingestion_status": "metadata_only"
+    }
+  ]
+}

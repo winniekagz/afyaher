@@ -97,6 +97,14 @@ If a separate frontend development server falls back to port 3001, the backend a
 
 ## API contract
 
+Interactive Swagger documentation is at
+[http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs) when the backend is running.
+ReDoc is at `/redoc`, and the live OpenAPI schema is at `/openapi.json`.
+See the [API guide](docs/api/README.md) and the
+[checked-in OpenAPI schema](docs/api/openapi.json) for synthetic examples and
+current endpoint limitations. From `backend/`, regenerate the schema with
+`uv run python -m scripts.export_openapi` after API documentation changes.
+
 `GET /api/v1/health` returns HTTP 200, JSON, and `Cache-Control: no-store`:
 
 ```json
@@ -104,6 +112,34 @@ If a separate frontend development server falls back to port 3001, the backend a
 ```
 
 This is a liveness check only. It says nothing about medical safety, databases, model readiness, or clinical approval. The frontend validates both response values and bounds the request to five seconds. Invalid JSON, HTTP errors, timeouts, and network failures all show a safe retry state.
+
+## Source registry
+
+`backend/data/sources/pcos.json` stores source **metadata only**, with no article text. Each record is validated by `app/schemas/knowledge.py`. Clinical review status and legal ingestion permission are kept as separate fields. Unverified dates and licences are recorded as `null`. A source can be ingested automatically only when its permission is `permitted`, a licence plus authorisation evidence (`authorization_reference`, `authorization_date`) are recorded, **and** its clinical review is `approved` (`app/services/knowledge.py`). No source meets these conditions yet. `app/services/chunking.py` splits supplied text into `SourcePassage` records and refuses ineligible sources. `app/services/citations.py` maps cited passage IDs to registry metadata and rejects passages that were not retrieved or that come from an unknown or ineligible source. Both are tested only with synthetic text; nothing fetches content. To inspect a registry, run this from `backend/`:
+
+```bash
+uv run python -m scripts.inspect_sources [path/to/registry.json]
+```
+
+Every source also has a `content_scope` (`production` or `development_only`). A fictional, non-medical fixture lives separately in `backend/data/fixtures/synthetic/`, with `evidence_type: synthetic_fixture`. Synthetic fixtures must be `development_only`. They can be chunked (`can_chunk`), but they never pass `is_eligible_for_production_retrieval`, and `resolve_citations` rejects them. Chunking keeps every non-whitespace character in order; whitespace is normalised. To rebuild the fixture passages (`passages/*.json`), run this from `backend/`:
+
+```bash
+uv run python -m scripts.build_passages
+```
+
+Legacy source metadata without `content_scope` loads as `development_only`;
+production evidence requires an explicit `production` scope plus all existing
+permission and clinical-review checks. Unknown retrieval scopes are rejected.
+Passage sets enforce their recorded size limit, sequential positions, and source
+IDs. Citation resolution also rejects duplicate retrieved IDs and inconsistent
+passage topic, ID, or position metadata. These checks establish traceability,
+not medical claim support. See [Step 5 review and verification](docs/STEP5_VERIFICATION.md).
+
+`app/services/retrieval.py` provides deterministic keyword retrieval over stored passages, as a stand-in for vector search. It has no embeddings or database. It defaults to the `production` scope, which excludes synthetic and development-only sources. An empty result means insufficient evidence. Queries are never logged or stored. To search the synthetic fixture (development scope only), run this from `backend/`:
+
+```bash
+uv run python -m scripts.search_passages "green lanterns"
+```
 
 ## Checks
 

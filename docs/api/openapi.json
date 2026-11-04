@@ -1,0 +1,275 @@
+{
+  "components": {
+    "schemas": {
+      "AnswerStatus": {
+        "enum": [
+          "answered",
+          "insufficient_evidence",
+          "clarification_needed",
+          "out_of_scope",
+          "urgent_guidance",
+          "service_unavailable"
+        ],
+        "title": "AnswerStatus",
+        "type": "string"
+      },
+      "EducationalRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "question": {
+            "description": "A question containing at least 3 non-whitespace characters",
+            "maxLength": 2000,
+            "title": "Question",
+            "type": "string"
+          },
+          "topic": {
+            "$ref": "#/components/schemas/Topic"
+          }
+        },
+        "required": [
+          "topic",
+          "question"
+        ],
+        "title": "EducationalRequest",
+        "type": "object"
+      },
+      "EducationalResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "answer": {
+            "title": "Answer",
+            "type": "string"
+          },
+          "disclaimer": {
+            "const": "This is educational information, not medical advice. Consult a qualified clinician for personal health decisions.",
+            "default": "This is educational information, not medical advice. Consult a qualified clinician for personal health decisions.",
+            "title": "Disclaimer",
+            "type": "string"
+          },
+          "limitations": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Explicit limitation or abstention when evidence is insufficient",
+            "title": "Limitations"
+          },
+          "question": {
+            "title": "Question",
+            "type": "string"
+          },
+          "sources": {
+            "items": {
+              "$ref": "#/components/schemas/SourceReference"
+            },
+            "title": "Sources",
+            "type": "array"
+          },
+          "status": {
+            "$ref": "#/components/schemas/AnswerStatus"
+          },
+          "topic": {
+            "$ref": "#/components/schemas/Topic"
+          }
+        },
+        "required": [
+          "status",
+          "topic",
+          "question",
+          "answer",
+          "sources"
+        ],
+        "title": "EducationalResponse",
+        "type": "object"
+      },
+      "HealthResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "service": {
+            "const": "afyaher-api",
+            "default": "afyaher-api",
+            "title": "Service",
+            "type": "string"
+          },
+          "status": {
+            "const": "ok",
+            "default": "ok",
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "title": "HealthResponse",
+        "type": "object"
+      },
+      "SourceReference": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "publisher": {
+            "title": "Publisher",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          },
+          "url": {
+            "format": "uri",
+            "maxLength": 2083,
+            "minLength": 1,
+            "title": "Url",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "publisher",
+          "url"
+        ],
+        "title": "SourceReference",
+        "type": "object"
+      },
+      "Topic": {
+        "enum": [
+          "pcos",
+          "ovarian-cysts",
+          "ovarian-torsion"
+        ],
+        "title": "Topic",
+        "type": "string"
+      }
+    }
+  },
+  "info": {
+    "description": "Private reproductive-health education engineering prototype for adults 18+. Use synthetic inputs only. This API does not diagnose, assess symptoms, provide treatment, or perform emergency screening.\n\nThe education endpoint is an unavailable stub: valid requests return HTTP 200 with application status `service_unavailable`, no medical answer, and no sources. Retrieval, safety screening, evidence assessment, and model generation are not connected to this route. Other answer-status enum values are reserved for future reviewed behavior. Health reports liveness only.\n\nThese docs do not establish clinical validation or approval for public use. Do not enter real health information or secrets.",
+    "title": "AfyaHer private prototype API",
+    "version": "0.1.0"
+  },
+  "openapi": "3.1.0",
+  "paths": {
+    "/api/v1/education/ask": {
+      "post": {
+        "description": "Accept an educational question and return a stub response.\n\nNo AI provider, retrieval pipeline, or safety screening is connected.\nEvery question receives an explicit service-unavailable status\nuntil the retrieval and generation layers are implemented.",
+        "operationId": "ask_api_v1_education_ask_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "examples": {
+                "synthetic_cysts": {
+                  "summary": "Synthetic ovarian-cysts routing example",
+                  "value": {
+                    "question": "Another fictional request for an API test.",
+                    "topic": "ovarian-cysts"
+                  }
+                },
+                "synthetic_pcos": {
+                  "summary": "Synthetic PCOS routing example (not medical content)",
+                  "value": {
+                    "question": "A synthetic educational question for testing.",
+                    "topic": "pcos"
+                  }
+                },
+                "synthetic_torsion": {
+                  "summary": "Synthetic ovarian-torsion routing example",
+                  "value": {
+                    "question": "A fictional topic-routing request for testing.",
+                    "topic": "ovarian-torsion"
+                  }
+                }
+              },
+              "schema": {
+                "$ref": "#/components/schemas/EducationalRequest",
+                "description": "Only topic and question are accepted. The question must be a string; leading/trailing whitespace is removed before checking at least three non-whitespace characters and at most 2,000 total characters. Do not send identifying information or real health questions."
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "example": {
+                  "answer": "Educational answers are not available yet.",
+                  "disclaimer": "This is educational information, not medical advice. Consult a qualified clinician for personal health decisions.",
+                  "limitations": "The evidence-backed answer service is not implemented.",
+                  "question": "A synthetic educational question for testing.",
+                  "sources": [],
+                  "status": "service_unavailable",
+                  "topic": "pcos"
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/EducationalResponse"
+                }
+              }
+            },
+            "description": "HTTP 200 with application status service_unavailable; no medical answer or citations. This is not an HTTP 503 response."
+          },
+          "405": {
+            "description": "The requested method is not supported by this path."
+          },
+          "422": {
+            "description": "Request validation failed: unsupported topic, wrong types, missing or extra fields, fewer than three non-whitespace characters, or more than 2,000 characters after trimming. Framework errors may echo input values; use synthetic data only."
+          }
+        },
+        "summary": "Validate an educational question (unavailable stub)",
+        "tags": [
+          "education"
+        ]
+      }
+    },
+    "/api/v1/health": {
+      "get": {
+        "description": "API liveness only; does not report database or AI readiness.",
+        "operationId": "health_api_v1_health_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "example": {
+                  "service": "afyaher-api",
+                  "status": "ok"
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponse"
+                }
+              }
+            },
+            "description": "The API process can respond; no database or AI checks occur.",
+            "headers": {
+              "Cache-Control": {
+                "description": "Prevent caching of liveness results.",
+                "schema": {
+                  "const": "no-store",
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Check API liveness",
+        "tags": [
+          "health"
+        ]
+      }
+    }
+  },
+  "tags": [
+    {
+      "description": "API liveness, not clinical readiness.",
+      "name": "health"
+    },
+    {
+      "description": "Validated educational requests; currently unavailable.",
+      "name": "education"
+    }
+  ]
+}
