@@ -246,7 +246,19 @@ class TestPcosRegistry:
     def test_loads_and_contains_expected_sources(self):
         registry = load_registry(SOURCES_DIR / "pcos.json")
         assert registry.topic == "pcos"
-        assert {s.id for s in registry.sources} == {"who-pcos", "monash-pcos-guideline"}
+        assert {s.id for s in registry.sources} == {
+            "who-pcos",
+            "fda-pcos",
+            "monash-pcos-guideline",
+        }
+
+    def test_fda_is_only_an_unreviewed_development_candidate(self):
+        registry = load_registry(SOURCES_DIR / "pcos.json")
+        candidate = next(s for s in registry.sources if s.id == "fda-pcos")
+        assert candidate.content_scope == "development_only"
+        assert candidate.clinical_review_status == "not_reviewed"
+        assert candidate.ingestion_permission == "not_verified"
+        assert not is_eligible_for_ingestion(candidate)
 
     def test_no_source_is_eligible_or_ingested(self):
         registry = load_registry(SOURCES_DIR / "pcos.json")
@@ -263,8 +275,8 @@ class TestInspectSources:
         out = capsys.readouterr().out
         assert "who-pcos" in out
         assert "World Health Organization" in out
-        assert "Total sources: 2" in out
-        assert "Not approved for ingestion (2):" in out
+        assert "Total sources: 3" in out
+        assert "Not approved for ingestion (3):" in out
 
     def test_reports_eligible_sources(self, tmp_path, capsys):
         path = write_registry(tmp_path, make_registry(make_source(**ELIGIBLE)))

@@ -19,6 +19,23 @@
       "ingestion_status": "metadata_only"
     },
     {
+      "id": "fda-pcos",
+      "topic": "pcos",
+      "title": "Polycystic Ovary Syndrome (PCOS)",
+      "publisher": "U.S. Food and Drug Administration",
+      "url": "https://www.fda.gov/consumers/womens-health-topics/polycystic-ovary-syndrome-pcos",
+      "evidence_type": "fact_sheet",
+      "content_scope": "development_only",
+      "publication_date": null,
+      "last_verified_date": "2026-11-04",
+      "clinical_review_status": "not_reviewed",
+      "ingestion_permission": "not_verified",
+      "license": null,
+      "authorization_reference": "https://www.fda.gov/about-fda/about-website/website-policies",
+      "authorization_date": null,
+      "ingestion_status": "metadata_only"
+    },
+    {
       "id": "monash-pcos-guideline",
       "topic": "pcos",
       "title": "International PCOS Guideline",

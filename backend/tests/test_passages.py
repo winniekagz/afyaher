@@ -426,9 +426,14 @@ class TestContentPolicies:
         assert not can_chunk(source)
         assert not is_eligible_for_production_retrieval(source)
 
-    def test_committed_pcos_sources_are_unchanged(self):
+    def test_original_scopes_are_unchanged_and_candidates_are_ineligible(self):
+        scopes = {
+            "who-pcos": "production",
+            "monash-pcos-guideline": "production",
+            "fda-pcos": "development_only",
+        }
         for source in load_registry(SOURCES_DIR / "pcos.json").sources:
-            assert source.content_scope == "production"
+            assert source.content_scope == scopes[source.id]
             assert source.evidence_type != "synthetic_fixture"
             assert not can_chunk(source)
             assert not is_eligible_for_production_retrieval(source)
