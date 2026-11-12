@@ -26,6 +26,7 @@ from app.schemas.knowledge import (
 
 DATA_DIR = Path(__file__).resolve().parents[2] / "data"
 SOURCES_DIR = DATA_DIR / "sources"
+APPROVED_PASSAGES_FILE = DATA_DIR / "approved" / "passages.json"
 SYNTHETIC_DIR = DATA_DIR / "fixtures" / "synthetic"
 
 

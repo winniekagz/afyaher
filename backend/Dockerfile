@@ -5,6 +5,8 @@ ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 UV_LINK_MODE=copy
 COPY pyproject.toml uv.lock .python-version ./
 RUN uv sync --frozen --no-dev --no-install-project
 COPY app ./app
+COPY data/sources ./data/sources
+COPY data/approved ./data/approved
 RUN useradd --uid 10001 --create-home appuser
 USER appuser
 EXPOSE 8000

@@ -19,7 +19,7 @@ citation can be traced to a publisher, URL, and review status.
 """
 
 from collections import Counter
-from datetime import date
+from datetime import date, datetime
 from enum import StrEnum
 from typing import Annotated
 
@@ -199,3 +199,58 @@ class RetrievedPassage(BaseModel):
     passage: SourcePassage
     score: int = Field(ge=1, description="Number of distinct query terms matched")
     matched_terms: list[str] = Field(min_length=1)
+
+
+class PassageReviewStatus(StrEnum):
+    DISCOVERED = "discovered"
+    RETRIEVED = "retrieved"
+    PROCESSED = "processed"
+    PENDING_REVIEW = "pending_review"
+    APPROVED = "approved"
+    REJECTED = "rejected"
+
+
+class CuratedPassage(BaseModel):
+    """A manually curated passage with an explicit passage-level review record.
+
+    Source-level permission and clinical review are checked separately before
+    indexing. Merely registering a source never approves its passages.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    source_id: SourceId
+    topic: Topic
+    section: NonEmptyStr
+    passage: Annotated[
+        str,
+        StringConstraints(
+            strip_whitespace=True, min_length=1, max_length=MAX_PASSAGE_CHARS
+        ),
+    ]
+    publication_date: date | None = None
+    review_status: PassageReviewStatus
+    approved_at: datetime | None = None
+    reviewer_qualification: NonEmptyStr | None = None
+
+    @model_validator(mode="after")
+    def check_review_record(self) -> "CuratedPassage":
+        is_approved = self.review_status is PassageReviewStatus.APPROVED
+        if is_approved != (self.approved_at is not None):
+            raise ValueError(
+                "approved passages require approved_at; other states forbid it"
+            )
+        if is_approved != (self.reviewer_qualification is not None):
+            raise ValueError(
+                "approved passages require reviewer_qualification; "
+                "other states forbid it"
+            )
+        if self.approved_at is not None and self.approved_at.tzinfo is None:
+            raise ValueError("approved_at must include a timezone")
+        return self
+
+
+class CuratedPassageBatch(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    passages: list[CuratedPassage]

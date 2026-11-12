@@ -13,6 +13,77 @@
         "title": "AnswerStatus",
         "type": "string"
       },
+      "CatalogueSource": {
+        "additionalProperties": false,
+        "properties": {
+          "clinical_review_status": {
+            "$ref": "#/components/schemas/ClinicalReviewStatus"
+          },
+          "content_scope": {
+            "$ref": "#/components/schemas/ContentScope"
+          },
+          "id": {
+            "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$",
+            "title": "Id",
+            "type": "string"
+          },
+          "ingestion_permission": {
+            "$ref": "#/components/schemas/IngestionPermission"
+          },
+          "ingestion_status": {
+            "$ref": "#/components/schemas/IngestionStatus"
+          },
+          "publisher": {
+            "title": "Publisher",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          },
+          "topic": {
+            "$ref": "#/components/schemas/Topic"
+          },
+          "url": {
+            "format": "uri",
+            "maxLength": 2083,
+            "minLength": 1,
+            "title": "Url",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "topic",
+          "title",
+          "publisher",
+          "url",
+          "clinical_review_status",
+          "ingestion_permission",
+          "ingestion_status",
+          "content_scope"
+        ],
+        "title": "CatalogueSource",
+        "type": "object"
+      },
+      "ClinicalReviewStatus": {
+        "enum": [
+          "not_reviewed",
+          "in_review",
+          "approved",
+          "rejected"
+        ],
+        "title": "ClinicalReviewStatus",
+        "type": "string"
+      },
+      "ContentScope": {
+        "enum": [
+          "development_only",
+          "production"
+        ],
+        "title": "ContentScope",
+        "type": "string"
+      },
       "EducationalRequest": {
         "additionalProperties": false,
         "properties": {
@@ -86,6 +157,27 @@
         "title": "EducationalResponse",
         "type": "object"
       },
+      "EvidenceSufficiency": {
+        "enum": [
+          "not_assessed",
+          "insufficient"
+        ],
+        "title": "EvidenceSufficiency",
+        "type": "string"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "title": "Detail",
+            "type": "array"
+          }
+        },
+        "title": "HTTPValidationError",
+        "type": "object"
+      },
       "HealthResponse": {
         "additionalProperties": false,
         "properties": {
@@ -103,6 +195,190 @@
           }
         },
         "title": "HealthResponse",
+        "type": "object"
+      },
+      "IngestionPermission": {
+        "enum": [
+          "not_verified",
+          "permitted",
+          "prohibited"
+        ],
+        "title": "IngestionPermission",
+        "type": "string"
+      },
+      "IngestionStatus": {
+        "enum": [
+          "metadata_only",
+          "ingested"
+        ],
+        "title": "IngestionStatus",
+        "type": "string"
+      },
+      "KnowledgeSearchHit": {
+        "additionalProperties": false,
+        "properties": {
+          "content_hash": {
+            "title": "Content Hash",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "passage": {
+            "title": "Passage",
+            "type": "string"
+          },
+          "publication_date": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Publication Date"
+          },
+          "score": {
+            "description": "Search ranking only; not evidence strength",
+            "minimum": 0.0,
+            "title": "Score",
+            "type": "integer"
+          },
+          "section": {
+            "title": "Section",
+            "type": "string"
+          },
+          "source_id": {
+            "title": "Source Id",
+            "type": "string"
+          },
+          "source_title": {
+            "title": "Source Title",
+            "type": "string"
+          },
+          "source_url": {
+            "format": "uri",
+            "maxLength": 2083,
+            "minLength": 1,
+            "title": "Source Url",
+            "type": "string"
+          },
+          "topic": {
+            "$ref": "#/components/schemas/Topic"
+          }
+        },
+        "required": [
+          "id",
+          "source_id",
+          "source_title",
+          "source_url",
+          "topic",
+          "section",
+          "passage",
+          "publication_date",
+          "score",
+          "content_hash"
+        ],
+        "title": "KnowledgeSearchHit",
+        "type": "object"
+      },
+      "KnowledgeSearchRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "limit": {
+            "default": 5,
+            "maximum": 10.0,
+            "minimum": 1.0,
+            "title": "Limit",
+            "type": "integer"
+          },
+          "question": {
+            "description": "A question containing at least 3 non-whitespace characters",
+            "maxLength": 2000,
+            "title": "Question",
+            "type": "string"
+          },
+          "topic": {
+            "$ref": "#/components/schemas/Topic"
+          }
+        },
+        "required": [
+          "topic",
+          "question"
+        ],
+        "title": "KnowledgeSearchRequest",
+        "type": "object"
+      },
+      "KnowledgeSearchResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "evidence_sufficiency": {
+            "$ref": "#/components/schemas/EvidenceSufficiency"
+          },
+          "passages": {
+            "items": {
+              "$ref": "#/components/schemas/KnowledgeSearchHit"
+            },
+            "title": "Passages",
+            "type": "array"
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          },
+          "status": {
+            "$ref": "#/components/schemas/RetrievalStatus"
+          },
+          "topic": {
+            "$ref": "#/components/schemas/Topic"
+          }
+        },
+        "required": [
+          "status",
+          "topic",
+          "evidence_sufficiency",
+          "passages"
+        ],
+        "title": "KnowledgeSearchResponse",
+        "type": "object"
+      },
+      "RetrievalStatus": {
+        "enum": [
+          "candidates_found",
+          "no_matching_evidence",
+          "retrieval_unavailable"
+        ],
+        "title": "RetrievalStatus",
+        "type": "string"
+      },
+      "SourceCatalogue": {
+        "additionalProperties": false,
+        "properties": {
+          "sources": {
+            "items": {
+              "$ref": "#/components/schemas/CatalogueSource"
+            },
+            "title": "Sources",
+            "type": "array"
+          },
+          "topic": {
+            "$ref": "#/components/schemas/Topic"
+          }
+        },
+        "required": [
+          "topic",
+          "sources"
+        ],
+        "title": "SourceCatalogue",
         "type": "object"
       },
       "SourceReference": {
@@ -145,11 +421,51 @@
         ],
         "title": "Topic",
         "type": "string"
+      },
+      "ValidationError": {
+        "properties": {
+          "ctx": {
+            "title": "Context",
+            "type": "object"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "title": "Location",
+            "type": "array"
+          },
+          "msg": {
+            "title": "Message",
+            "type": "string"
+          },
+          "type": {
+            "title": "Error Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError",
+        "type": "object"
       }
     }
   },
   "info": {
-    "description": "Private reproductive-health education engineering prototype for adults 18+. Use synthetic inputs only. This API does not diagnose, assess symptoms, provide treatment, or perform emergency screening.\n\nThe education endpoint is an unavailable stub: valid requests return HTTP 200 with application status `service_unavailable`, no medical answer, and no sources. Retrieval, safety screening, evidence assessment, and model generation are not connected to this route. Other answer-status enum values are reserved for future reviewed behavior. Health reports liveness only.\n\nThese docs do not establish clinical validation or approval for public use. Do not enter real health information or secrets.",
+    "description": "Private reproductive-health education engineering prototype for adults 18+. Use synthetic inputs only. This API does not diagnose, assess symptoms, provide treatment, or perform emergency screening.\n\nThe education endpoint remains an unavailable stub. The separate knowledge search endpoint returns only provenance-checked approved passage candidates; it does not generate answers or assess claim support. Health reports liveness only.\n\nThese docs do not establish clinical validation or approval for public use. Do not enter real health information or secrets.",
     "title": "AfyaHer private prototype API",
     "version": "0.1.0"
   },
@@ -260,9 +576,110 @@
           "health"
         ]
       }
+    },
+    "/api/v1/knowledge/search": {
+      "post": {
+        "description": "Searches Typesense with an exact topic filter and returns provenance-checked passage candidates. A search match is not claim-support validation. Empty results abstain; Typesense failures return retrieval_unavailable. No LLM is called.",
+        "operationId": "search_knowledge_api_v1_knowledge_search_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/KnowledgeSearchRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KnowledgeSearchResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KnowledgeSearchResponse"
+                }
+              }
+            },
+            "description": "Retrieval unavailable"
+          }
+        },
+        "summary": "Search approved passages without generating an answer",
+        "tags": [
+          "knowledge"
+        ]
+      }
+    },
+    "/api/v1/knowledge/sources": {
+      "get": {
+        "description": "Returns local registry metadata only, including unreviewed candidates. Listing is not ingestion permission, clinical approval or claim support. No publisher download, passage retrieval or LLM call occurs. Supported topics without a registry return an empty list.",
+        "operationId": "sources_api_v1_knowledge_sources_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "topic",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/Topic"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SourceCatalogue"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          },
+          "503": {
+            "description": "Source catalogue unavailable"
+          }
+        },
+        "summary": "List source metadata and review status",
+        "tags": [
+          "knowledge"
+        ]
+      }
     }
   },
   "tags": [
+    {
+      "description": "Source metadata and passage retrieval candidates; a search match is not evidence sufficiency or claim support.",
+      "name": "knowledge"
+    },
     {
       "description": "API liveness, not clinical readiness.",
       "name": "health"

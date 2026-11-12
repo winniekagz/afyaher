@@ -10,6 +10,7 @@ dependencies = [
     { name = "fastapi" },
     { name = "pydantic" },
     { name = "pydantic-settings" },
+    { name = "typesense" },
     { name = "uvicorn" },
 ]
 
@@ -25,6 +26,7 @@ requires-dist = [
     { name = "fastapi", specifier = ">=0.115,<1" },
     { name = "pydantic", specifier = ">=2.10,<3" },
     { name = "pydantic-settings", specifier = ">=2.7,<3" },
+    { name = "typesense", specifier = "==2.1.1" },
     { name = "uvicorn", specifier = ">=0.34,<1" },
 ]
 
@@ -351,6 +353,19 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/ad/eb/4e197bf26b023abafc5e9043ec8710d7de0fcb032d0969045236d72aa0b1/starlette-1.9.0.tar.gz", hash = "sha256:3d931de246ed870e35ce605974440816ef895e592f255d1396cfdf191d4c4318", size = 2732466, upload-time = "2026-10-18T15:50:33.189Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/f3/93/181df62699d9b5aca1d87e5cfda131dac87e3cdaebf668662f7206ca3470/starlette-1.9.0-py3-none-any.whl", hash = "sha256:fd3f159936e882d06c1108f84688f7cda2cf85fc6a592a50edbd175e882c2ddc", size = 80335, upload-time = "2026-10-18T15:50:31.526Z" },
+]
+
+[[package]]
+name = "typesense"
+version = "2.1.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "httpx" },
+    { name = "typing-extensions" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/5c/25/5e582ea98ffe6df71e9db8c4288a9bc9179efbace1d49a371e716ffd93f1/typesense-2.1.1.tar.gz", hash = "sha256:5d1fded865ecf9a9e564a4e6b8aa9229c34287e958dc3b16eec408376d142a42", size = 97341, upload-time = "2026-10-23T09:23:19.964Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/38/22/d848100d45976e612865251f89607d941199003d24a622b8afc5b9503b88/typesense-2.1.1-py3-none-any.whl", hash = "sha256:e37f799be67cc3a948ac756826e0c2451882a61d37d4da6235a4a80c2436afd6", size = 160564, upload-time = "2026-10-23T09:23:18.461Z" },
 ]
 
 [[package]]

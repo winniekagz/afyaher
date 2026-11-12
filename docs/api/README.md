@@ -1,6 +1,6 @@
 # AfyaHer API and Swagger documentation
 
-The current API has two application endpoints. Documentation is generated from
+The current API has four application endpoints. Documentation is generated from
 the FastAPI routes and existing Pydantic models; no separate Swagger service or
 new dependency is needed.
 
@@ -23,16 +23,19 @@ Compose override. The documentation pages use FastAPI's default externally hoste
 Swagger/ReDoc UI assets; they may require internet access to render. The live JSON
 and [checked-in schema](openapi.json) can be read without those UI assets.
 
-Use synthetic input only, including Swagger's **Try it out** action. No API key
-or account is required for this local prototype. CORS and documentation notices
-are not authentication. Keep the backend on loopback; no public deployment or
-clinical approval is implied.
+Use synthetic input only, including Swagger's **Try it out** action. No client
+API key or account is required. The backend's Typesense admin key is configured
+server-side and is never sent to clients. CORS and documentation notices are not
+authentication. Keep the backend on loopback; no public deployment or clinical
+approval is implied.
 
 ## Endpoints
 
 | Method and path | Success behavior | Validation/failure behavior |
 | --- | --- | --- |
 | `GET /api/v1/health` | HTTP 200, `{"status":"ok","service":"afyaher-api"}`, `Cache-Control: no-store` | Unsupported methods return 405. Liveness only, not database, evidence, AI, or clinical readiness |
+| `GET /api/v1/knowledge/sources?topic=pcos` | HTTP 200 with `topic` and `sources`; `Cache-Control: no-store`. Returns local source metadata and review/permission/scope status. Supported topics without a registry return an empty list. | Missing/unsupported topic returns 422; registry read/validation failure returns generic 503. No publisher fetching, article text, passages, model calls or evidence approval. |
+| `POST /api/v1/knowledge/search` | Searches the versioned Typesense collection with exact topic and approved-status filters. Returns traceable passage candidates with `evidence_sufficiency: not_assessed`, or a no-match abstention. | Invalid request returns 422. Typesense/configuration/provenance failures return HTTP 503 with `retrieval_unavailable`. No keyword fallback, answer generation, or claim-support assessment. |
 | `POST /api/v1/education/ask` | HTTP 200 with application status `service_unavailable`, empty `sources`, and fixed limitation/disclaimer | Invalid request returns framework 422; unsupported methods return 405. No answer generation, symptom screening, retrieval or medical evidence assessment is connected |
 
 The education request accepts only:

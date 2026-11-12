@@ -28,7 +28,12 @@ def test_checked_in_schema_matches_live_documentation(client):
     response = client.get("/openapi.json")
     assert response.status_code == 200
     assert response.json() == json.loads(DEFAULT_OUTPUT.read_text("utf-8"))
-    assert set(response.json()["paths"]) == {"/api/v1/health", "/api/v1/education/ask"}
+    assert set(response.json()["paths"]) == {
+        "/api/v1/health",
+        "/api/v1/education/ask",
+        "/api/v1/knowledge/sources",
+        "/api/v1/knowledge/search",
+    }
 
 
 def test_swagger_example_matches_actual_unavailable_response(client):

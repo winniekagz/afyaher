@@ -44,14 +44,16 @@ Development and build scripts explicitly use Next.js's supported Webpack option 
 From the repository root:
 
 ```bash
-docker compose up --build -d --wait
+cp -n backend/.env.example backend/.env
+# Set a private local TYPESENSE_API_KEY in backend/.env before starting Compose.
+docker compose --env-file backend/.env up --build -d --wait
 docker compose ps
 docker compose logs --tail=50
 ```
 
 Open http://127.0.0.1:3000. The API is at http://127.0.0.1:8000/api/v1/health. Both host ports bind only to loopback. Containers run as non-root users and have health checks. Stop them with `docker compose down` before running the local Playwright servers.
 
-The browser calls the API on the host's loopback address, not the internal Docker service name. The public API URL is a frontend build argument; rebuild the frontend if it changes. The containers contain no secrets, personal data, database, or AI service. Initial builds download base images and locked dependencies. Use `docker compose up --build -d --wait` after source changes; source files are not bind-mounted.
+The browser calls the API on the host's loopback address, not the internal Docker service name. The public API URL is a frontend build argument; rebuild the frontend if it changes. The local Typesense admin key is supplied to the Typesense and backend containers only; it is not included in the frontend. This phase has no database or AI service. Initial builds download base images and locked dependencies. Use `docker compose --env-file backend/.env up --build -d --wait` after source changes; source files are not bind-mounted.
 
 With the containers running, use `npm run test:e2e:docker` from `frontend/` to run the browser checks without starting duplicate servers.
 
@@ -127,6 +129,17 @@ current endpoint limitations. From `backend/`, regenerate the schema with
 
 This is a liveness check only. It says nothing about medical safety, databases, model readiness, or clinical approval. The frontend validates both response values and bounds the request to five seconds. Invalid JSON, HTTP errors, timeouts, and network failures all show a safe retry state.
 
+## Typesense retrieval phase
+
+Typesense now provides topic-filtered text search over approved passage records.
+The separate `POST /api/v1/knowledge/search` endpoint returns provenance-checked
+candidates only; it does not call an LLM or claim that passages support an
+answer. Empty results abstain, and retrieval failures do not fall back to the
+development keyword retriever. The checked-in passage input is intentionally
+empty because no medical passages have completed qualified review and
+permission checks. See [Typesense local setup](docs/TYPESENSE_SETUP.md), the
+[system design](docs/SYSTEM_DESIGN.md), and [AI safety boundary](docs/AI_SAFETY.md).
+
 ## Source registry
 
 `backend/data/sources/pcos.json` stores source **metadata only**, with no article text. Each record is validated by `app/schemas/knowledge.py`. Clinical review status and legal ingestion permission are kept as separate fields. Unverified dates and licences are recorded as `null`. A source can be ingested automatically only when its permission is `permitted`, a licence plus authorisation evidence (`authorization_reference`, `authorization_date`) are recorded, **and** its clinical review is `approved` (`app/services/knowledge.py`). No source meets these conditions yet. `app/services/chunking.py` splits supplied text into `SourcePassage` records and refuses ineligible sources. `app/services/citations.py` maps cited passage IDs to registry metadata and rejects passages that were not retrieved or that come from an unknown or ineligible source. Both are tested only with synthetic text; nothing fetches content. To inspect a registry, run this from `backend/`:
@@ -154,6 +167,12 @@ not medical claim support. See [Step 5 review and verification](docs/STEP5_VERIF
 ```bash
 uv run python -m scripts.search_passages "green lanterns"
 ```
+
+The [PCOS knowledge-base starter](docs/knowledge-base/README.md) documents source
+reuse restrictions and an optional hosted free-model experiment. The experiment
+selects existing synthetic passage IDs only; the medical assistant remains
+unavailable. FDA is a new unreviewed, development-only metadata candidate. No
+medical source is approved for ingestion or production retrieval.
 
 ## Checks
 
