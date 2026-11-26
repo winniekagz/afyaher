@@ -351,6 +351,109 @@
         "title": "KnowledgeSearchResponse",
         "type": "object"
       },
+      "QuestionReason": {
+        "enum": [
+          "urgent_notice",
+          "personal_advice",
+          "unsupported_topic",
+          "topic_mismatch",
+          "clarify_topic",
+          "no_approved_evidence",
+          "retrieval_unavailable",
+          "verification_unavailable"
+        ],
+        "title": "QuestionReason",
+        "type": "string"
+      },
+      "QuestionResponse": {
+        "additionalProperties": false,
+        "description": "No raw-question echo, generated claims or citations can be published.\n\nA future answered contract requires independent claim verification. Do not\nloosen these constraints merely because retrieval returned valid passage IDs.",
+        "properties": {
+          "citations": {
+            "items": {
+              "$ref": "#/components/schemas/SourceReference"
+            },
+            "maxItems": 0,
+            "title": "Citations",
+            "type": "array"
+          },
+          "disclaimer": {
+            "default": "This is educational information, not medical advice. Consult a qualified clinician for personal health decisions.",
+            "title": "Disclaimer",
+            "type": "string"
+          },
+          "grounding": {
+            "const": "not_established",
+            "default": "not_established",
+            "title": "Grounding",
+            "type": "string"
+          },
+          "key_points": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 0,
+            "title": "Key Points",
+            "type": "array"
+          },
+          "next_steps": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Next Steps",
+            "type": "array"
+          },
+          "reason": {
+            "$ref": "#/components/schemas/QuestionReason"
+          },
+          "short_answer": {
+            "title": "Short Answer",
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/QuestionStatus"
+          },
+          "suggested_clinician_questions": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Suggested Clinician Questions",
+            "type": "array"
+          },
+          "topic": {
+            "$ref": "#/components/schemas/Topic"
+          },
+          "uncertainties": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Uncertainties",
+            "type": "array"
+          }
+        },
+        "required": [
+          "status",
+          "reason",
+          "topic",
+          "short_answer",
+          "uncertainties",
+          "next_steps",
+          "suggested_clinician_questions"
+        ],
+        "title": "QuestionResponse",
+        "type": "object"
+      },
+      "QuestionStatus": {
+        "enum": [
+          "insufficient_evidence",
+          "clarification_needed",
+          "out_of_scope",
+          "urgent_guidance",
+          "service_unavailable"
+        ],
+        "title": "QuestionStatus",
+        "type": "string"
+      },
       "RetrievalStatus": {
         "enum": [
           "candidates_found",
@@ -671,6 +774,57 @@
         "summary": "List source metadata and review status",
         "tags": [
           "knowledge"
+        ]
+      }
+    },
+    "/api/v1/questions": {
+      "post": {
+        "description": "Validates input, interrupts recognized urgent wording before retrieval, and checks scope. Uses the existing approved Typesense retrieval path. No approved medical corpus or claim-level verifier is available: this phase never publishes an answered status, generated claims or citations. Each question is independent. Use synthetic scenarios only.",
+        "operationId": "ask_question_api_v1_questions_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EducationalRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QuestionResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "413": {
+            "description": "Body exceeds 16 KiB"
+          },
+          "422": {
+            "description": "Invalid request; raw input is not echoed"
+          },
+          "429": {
+            "description": "Local per-client question rate limit reached"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QuestionResponse"
+                }
+              }
+            },
+            "description": "Evidence service unavailable"
+          }
+        },
+        "summary": "Ask a general educational question (safe fallback phase)",
+        "tags": [
+          "education"
         ]
       }
     }

@@ -6,7 +6,6 @@ from pydantic import ValidationError
 from app.core.config import Settings
 from app.schemas.catalogue import CatalogueSource, SourceCatalogue
 from app.schemas.educational import Topic
-from app.schemas.knowledge import CuratedPassageBatch, PassageReviewStatus
 from app.schemas.retrieval import (
     EvidenceSufficiency,
     KnowledgeSearchRequest,
@@ -16,16 +15,17 @@ from app.schemas.retrieval import (
 from app.services.knowledge import (
     APPROVED_PASSAGES_FILE,
     SOURCES_DIR,
-    is_eligible_for_production_retrieval,
     load_registry,
 )
-from app.services.knowledge_search import search_approved_knowledge
+from app.services.knowledge_search import (
+    load_approved_material,
+    search_approved_knowledge,
+)
 from app.services.typesense_store import (
     InvalidIndexedPassage,
     TypesenseKnowledgeStore,
     TypesenseUnavailable,
     create_typesense_client,
-    passage_document_id,
 )
 
 router = APIRouter(prefix="/api/v1/knowledge", tags=["knowledge"])
@@ -94,27 +94,9 @@ async def search_knowledge(
     try:
         client = create_typesense_client(settings)
         store = TypesenseKnowledgeStore(client, settings.typesense_collection)
-        sources_by_id = {}
-        for path in sorted(SOURCES_DIR.glob("*.json")):
-            registry = load_registry(path)
-            for source in registry.sources:
-                if source.id in sources_by_id:
-                    raise ValueError("Duplicate source metadata")
-                sources_by_id[source.id] = source
-        passage_batch = CuratedPassageBatch.model_validate_json(
-            APPROVED_PASSAGES_FILE.read_text(encoding="utf-8")
+        sources_by_id, approved_passages = load_approved_material(
+            SOURCES_DIR, APPROVED_PASSAGES_FILE
         )
-        approved_passages = {}
-        for passage in passage_batch.passages:
-            if passage.review_status is not PassageReviewStatus.APPROVED:
-                continue
-            source = sources_by_id.get(passage.source_id)
-            if source is None:
-                raise ValueError("Approved passage source is missing")
-            if passage.topic is not source.topic:
-                raise ValueError("Approved passage topic does not match its source")
-            if is_eligible_for_production_retrieval(source):
-                approved_passages[passage_document_id(passage)] = passage
         return await search_approved_knowledge(
             request_body.question,
             request_body.topic,

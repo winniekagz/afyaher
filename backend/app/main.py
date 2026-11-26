@@ -1,10 +1,14 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 
 from app.api.v1.education import router as education_router
 from app.api.v1.health import router as health_router
 from app.api.v1.knowledge import router as knowledge_router
+from app.api.v1.questions import router as questions_router
 from app.core.config import Settings
+from app.core.question_limits import QuestionLimits
 
 
 def create_app(settings: Settings | None = None) -> FastAPI:
@@ -40,6 +44,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         swagger_ui_parameters={"displayRequestDuration": True},
     )
     app.state.settings = settings
+    app.add_middleware(QuestionLimits)
     app.add_middleware(
         CORSMiddleware,
         allow_origins=settings.cors_origins,
@@ -50,6 +55,26 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(health_router)
     app.include_router(education_router)
     app.include_router(knowledge_router)
+    app.include_router(questions_router)
+
+    @app.exception_handler(RequestValidationError)
+    async def invalid_request(
+        _request: Request, _error: RequestValidationError
+    ) -> JSONResponse:
+        # Default framework errors can echo sensitive values and unexpected keys.
+        return JSONResponse(
+            status_code=422,
+            content={
+                "detail": [
+                    {
+                        "type": "request_validation",
+                        "msg": "Invalid request. Check fields, types and limits.",
+                    }
+                ]
+            },
+            headers={"Cache-Control": "no-store"},
+        )
+
     return app
 
 

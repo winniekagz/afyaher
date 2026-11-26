@@ -17,7 +17,12 @@ from tests.test_knowledge import ELIGIBLE, make_source
 
 
 def source(**overrides) -> KnowledgeSource:
-    return KnowledgeSource.model_validate(make_source(**(ELIGIBLE | overrides)))
+    data = ELIGIBLE | overrides
+    if any(
+        key in overrides for key in ("ingestion_permission", "clinical_review_status")
+    ):
+        data["ingestion_status"] = "metadata_only"
+    return KnowledgeSource.model_validate(make_source(**data))
 
 
 def record(**overrides) -> RetrievedPassage:
@@ -56,6 +61,7 @@ def test_synthetic_with_fictional_approval_metadata_is_rejected():
     "overrides",
     [
         {"content_scope": "development_only"},
+        {"ingestion_status": "metadata_only"},
         {"ingestion_permission": "not_verified"},
         {"ingestion_permission": "prohibited"},
         {"clinical_review_status": "not_reviewed"},

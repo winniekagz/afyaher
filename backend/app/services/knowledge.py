@@ -20,6 +20,7 @@ from app.schemas.knowledge import (
     ContentScope,
     EvidenceType,
     IngestionPermission,
+    IngestionStatus,
     KnowledgeSource,
     SourceRegistry,
 )
@@ -70,4 +71,5 @@ def is_eligible_for_production_retrieval(source: KnowledgeSource) -> bool:
         not is_synthetic_fixture(source)
         and source.content_scope is ContentScope.PRODUCTION
         and is_eligible_for_ingestion(source)
+        and source.ingestion_status is IngestionStatus.INGESTED
     )

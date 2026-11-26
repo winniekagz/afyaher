@@ -33,6 +33,7 @@ def test_checked_in_schema_matches_live_documentation(client):
         "/api/v1/education/ask",
         "/api/v1/knowledge/sources",
         "/api/v1/knowledge/search",
+        "/api/v1/questions",
     }
 
 

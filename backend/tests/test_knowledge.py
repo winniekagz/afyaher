@@ -52,6 +52,8 @@ def write_registry(tmp_path, data) -> str:
 
 
 ELIGIBLE = {
+    # Fictional in-memory metadata only, never a real clinical approval.
+    "ingestion_status": "ingested",
     "ingestion_permission": "permitted",
     "license": "Synthetic test license",
     "authorization_reference": "https://example.org/license",
@@ -205,7 +207,13 @@ class TestIngestionEligibility:
 
     def test_unknown_permission_is_not_eligible(self):
         source = KnowledgeSource.model_validate(
-            make_source(**{**ELIGIBLE, "ingestion_permission": "not_verified"})
+            make_source(
+                **{
+                    **ELIGIBLE,
+                    "ingestion_permission": "not_verified",
+                    "ingestion_status": "metadata_only",
+                }
+            )
         )
         assert not is_eligible_for_ingestion(source)
 
@@ -220,7 +228,9 @@ class TestIngestionEligibility:
     )
     def test_not_eligible_when_any_condition_fails(self, overrides):
         source = KnowledgeSource.model_validate(
-            make_source(**{**ELIGIBLE, **overrides})
+            make_source(
+                **{**ELIGIBLE, **overrides, "ingestion_status": "metadata_only"}
+            )
         )
         assert not is_eligible_for_ingestion(source)
 
